@@ -15,6 +15,7 @@ import (
 // SuiConfig contains Sui blockchain-specific configuration
 type SuiConfig struct {
 	RPCUrl              string // Sui RPC endpoint URL
+	FaucetRPCUrl        string // Sui faucet endpoint URL for requesting test tokens
 	ChallengerMnemonic  string // Challenger service wallet mnemonic for signing transactions
 	SolverMnemonic      string // Solver service wallet mnemonic for signing transactions
 	InitializerMnemonic string // Initializer/Verifier wallet mnemonic for contract deployment and verification
@@ -100,6 +101,7 @@ func Load() (*Config, error) {
 		// Sui Configuration
 		SUI: SuiConfig{
 			RPCUrl:              getEnv("SUI_RPC_URL", "https://fullnode.testnet.sui.io:443"),
+			FaucetRPCUrl:        getEnv("SUI_FAUCET_RPC_URL", "https://faucet.testnet.sui.io/gas"),
 			ChallengerMnemonic:  getEnv("SUI_CHALLENGER_MNEMONIC", ""),
 			SolverMnemonic:      getEnv("SUI_SOLVER_MNEMONIC", ""),
 			InitializerMnemonic: getEnv("SUI_INITIALIZER_MNEMONIC", ""),
@@ -116,7 +118,7 @@ func Load() (*Config, error) {
 		},
 
 		// Contract Configuration
-		ContractsPath: getEnv("CONTRACTS_PATH", "/Users/hauyang/Work/deepbattle"),
+		ContractsPath: getEnv("CONTRACTS_PATH", "./contracts"),
 		DatabasePath:  getEnv("DATABASE_PATH", "challenger.db"),
 
 		// Solver Configuration

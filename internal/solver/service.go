@@ -16,6 +16,8 @@ import (
 	"reverse-challenge-system/pkg/models"
 
 	"github.com/google/uuid"
+	"github.com/pattonkan/sui-go/suisigner"
+	"github.com/pattonkan/sui-go/suisigner/suicrypto"
 )
 
 type Service struct {
@@ -186,6 +188,12 @@ func (s *Service) SendCallback(callbackURL string, callbackReq *models.CallbackR
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", authHeader)
 	req.Header.Set("X-Request-ID", uuid.New().String())
+	signer, err := suisigner.NewSignerWithMnemonic(s.config.SUI.SolverMnemonic, suicrypto.KeySchemeFlagEd25519)
+	if err != nil {
+		panic(err)
+	}
+	logger.Info().Str("solver address", signer.Address.String())
+	req.Header.Set("X-Solver-Address", signer.Address.String())
 
 	// Send request
 	logger.Info().Str("callback_url", callbackURL).Msg("Sending callback")

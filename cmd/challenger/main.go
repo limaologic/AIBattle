@@ -17,7 +17,10 @@ import (
 	"reverse-challenge-system/pkg/sui"
 
 	"github.com/gorilla/mux"
+	"github.com/pattonkan/sui-go/suiclient"
 	"github.com/pattonkan/sui-go/suiclient/conn"
+	"github.com/pattonkan/sui-go/suisigner"
+	"github.com/pattonkan/sui-go/suisigner/suicrypto"
 	"github.com/rs/zerolog/log"
 )
 
@@ -47,6 +50,13 @@ func main() {
 	secrets := cfg.GetChallengerSecrets()
 	hmacAuth := auth.NewHMACAuth(secrets, cfg.GetClockSkew())
 	startupLogger.Info().Int("secret_count", len(secrets)).Msg("HMAC authentication initialized")
+
+	singer, err := suisigner.NewSignerWithMnemonic(cfg.SUI.ChallengerMnemonic, suicrypto.KeySchemeFlagEd25519)
+	if err != nil {
+		panic(err)
+	}
+
+	err = suiclient.RequestFundFromFaucet(singer.Address, cfg.SUI.FaucetRPCUrl)
 
 	// Initialize Sui TransactionBuilder if mnemonic is provided
 	var suiTxBuilder *sui.TransactionBuilder

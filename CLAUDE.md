@@ -245,7 +245,7 @@ The system includes a contract deployment initializer that mirrors the structure
 SUI_MNEMONIC=abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about
 SUI_RPC_URL=https://fullnode.testnet.sui.io:443
 SUI_CHAIN_ID=testnet
-CONTRACTS_PATH=/Users/hauyang/Work/deepbattle
+CONTRACTS_PATH=./contract
 DATABASE_PATH=challenger.db
 ```
 
