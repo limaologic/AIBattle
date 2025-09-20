@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  challenger:
+    build:
+      context: .
+      dockerfile: Dockerfile.challenger
+    container_name: rcs-challenger
+    ports:
+      - "8080:8080"
+    environment:
+      - CHALLENGER_HOST=0.0.0.0
+      - CHALLENGER_PORT=8080
+      - PUBLIC_CALLBACK_HOST=${PUBLIC_CALLBACK_HOST:-https://example.ngrok.io}
+      - CHALLENGER_CALLBACK_KEY=${CHALLENGER_CALLBACK_KEY:-chal-secret-key-123}
+      - CHAL_HMAC_KEY_ID=${CHAL_HMAC_KEY_ID:-chal-kid-1}
+      - SHARED_SECRET_KEY=${SHARED_SECRET_KEY:-shared-very-secret-string-for-hmac-signature}
+      - CLOCK_SKEW_SECONDS=${CLOCK_SKEW_SECONDS:-300}
+      - CHALLENGER_DB_PATH=/data/challenger.db
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - challenger_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - rcs-network
+
+  solver:
+    build:
+      context: .
+      dockerfile: Dockerfile.solver
+    container_name: rcs-solver
+    ports:
+      - "8081:8081"
+    environment:
+      - SOLVER_HOST=0.0.0.0
+      - SOLVER_PORT=8081
+      - SOLVER_API_KEY=${SOLVER_API_KEY:-solver-secret-key-456}
+      - SOLVER_WORKER_COUNT=${SOLVER_WORKER_COUNT:-4}
+      - SOLVER_HMAC_KEY_ID=${SOLVER_HMAC_KEY_ID:-solver-kid-1}
+      - SHARED_SECRET_KEY=${SHARED_SECRET_KEY:-shared-very-secret-string-for-hmac-signature}
+      - CLOCK_SKEW_SECONDS=${CLOCK_SKEW_SECONDS:-300}
+      - SOLVER_DB_PATH=/data/solver.db
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - solver_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - rcs-network
+    depends_on:
+      challenger:
+        condition: service_healthy
+
+  # Optional: nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: rcs-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - challenger
+      - solver
+    networks:
+      - rcs-network
+    profiles:
+      - production
+
+volumes:
+  challenger_data:
+    driver: local
+  solver_data:
+    driver: local
+
+networks:
+  rcs-network:
+    driver: bridge

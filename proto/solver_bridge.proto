@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package solverbridge;
+
+option go_package = "proto/solverbridge;solverbridge";
+
+// Service that external (e.g., Python) solvers can use to submit answers.
+service SolverBridge {
+  rpc SubmitAnswer(SubmitAnswerRequest) returns (SubmitAnswerResponse);
+}
+
+message SubmitAnswerRequest {
+  string challenge_id = 1;   // Required
+  string answer = 2;         // Solver's answer (if success)
+  string solver_job_id = 3;  // Optional job identifier
+  string status = 4;         // "success" or "failed"; defaults to success if empty
+  string error_code = 5;     // If failed
+  string error_message = 6;  // If failed
+}
+
+message SubmitAnswerResponse {
+  bool accepted = 1;
+  string message = 2;
+}
