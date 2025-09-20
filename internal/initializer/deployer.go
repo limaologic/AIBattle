@@ -384,10 +384,11 @@ func (d *SuiDeployer) createVault(
 	var vaultAdminCapId *sui.ObjectId
 	for _, change := range txnResponse.ObjectChanges {
 		if change.Data.Created != nil {
-			if strings.Contains(string(change.Data.Created.ObjectType), "ctf_registry::Vault") {
+			resource := sui.MustNewResourceType(change.Data.Created.ObjectType)
+			if resource.Module == "ctf_registry" && resource.ObjectName == "Vault" {
 				vaultId = &change.Data.Created.ObjectId
 			}
-			if strings.Contains(string(change.Data.Created.ObjectType), "ctf_registry::VaultAdminCap") {
+			if resource.Module == "ctf_registry" && resource.ObjectName == "VaultAdminCap" {
 				vaultAdminCapId = &change.Data.Created.ObjectId
 			}
 		}
