@@ -83,12 +83,12 @@ func Run(ctx context.Context, cfg *config.Config, opts ...func(*Options)) error 
 		return fmt.Errorf("failed to initialize Sui client: %w", err)
 	}
 
-	// Request funds from faucet if requested
-	if options.FundFromFaucet {
-		if err := fundFromFaucet(client, signer, cfg); err != nil {
-			return fmt.Errorf("failed to fund from faucet: %w", err)
-		}
-	}
+	// // Request funds from faucet if requested
+	// if options.FundFromFaucet {
+	// 	if err := fundFromFaucet(client, signer, cfg); err != nil {
+	// 		return fmt.Errorf("failed to fund from faucet: %w", err)
+	// 	}
+	// }
 
 	// Deploy contracts
 	deployer := NewSuiDeployer(client, signer, options.ContractPath)
